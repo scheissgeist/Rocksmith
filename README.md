@@ -6,7 +6,9 @@ Save $20+ by using **any cheap USB guitar cable** instead of the expensive offic
 
 ### ⚡ Super Simple Setup (5 Minutes)
 
-**Download and run:** [RocksmithCableInstaller.exe](https://github.com/scheissgeist/Rocksmith/releases/latest) *(coming soon!)*
+**[⬇️ DOWNLOAD INSTALLER](https://github.com/scheissgeist/Rocksmith/releases/download/v1.0/ultimate-installer.exe)** ← Click here!
+
+Just download and run `ultimate-installer.exe` - it does everything for you.
 
 **Or use the script version:** [ultimate-installer.bat](scripts/ultimate-installer.bat) or [ultimate-installer.ps1](scripts/ultimate-installer.ps1)
 
@@ -41,9 +43,9 @@ If you can:
 
 ### Option 1: One-Click Installer (Easiest) ⚡
 
-**Download and run:** [ultimate-installer.bat](scripts/ultimate-installer.bat)
+**[⬇️ DOWNLOAD INSTALLER](https://github.com/scheissgeist/Rocksmith/releases/download/v1.0/ultimate-installer.exe)**
 
-**Download and run:** [ultimate-installer.bat](scripts/ultimate-installer.bat)
+Just run the EXE and click "Next" a few times!
 
 **What it does:**
 - Downloads everything you need
