@@ -18,10 +18,21 @@ This guide helps you play **Rocksmith 2014** with **cheap generic USB guitar cab
 
 ## 🎸 Quick Start (TL;DR)
 
+### Option 1: Ultimate Installer (One-Click Setup) ⚡
+
+**Download and run:** [ultimate-installer.bat](scripts/ultimate-installer.bat) or [ultimate-installer.ps1](scripts/ultimate-installer.ps1)
+
+This will:
+- ✅ Download FL Studio ASIO automatically
+- ✅ Download RS_ASIO v0.7.4 automatically
+- ✅ Find your audio devices
+- ✅ Configure everything for you
+
+### Option 2: Manual Setup
+
 1. Install [FL Studio ASIO](https://www.image-line.com/fl-studio-asio/) (free)
 2. Download [RS_ASIO v0.7.4](https://github.com/mdias/rs_asio/releases/tag/v0.7.4)
-3. Run our [quick-setup script](scripts/quick-setup.bat)
-4. Launch Rocksmith and calibrate
+3. Follow the [detailed guide](docs/detailed-guide.md)
 
 **Full guide:** See [docs/detailed-guide.md](docs/detailed-guide.md)
 
