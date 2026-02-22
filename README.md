@@ -288,14 +288,4 @@ MIT License - See [LICENSE](LICENSE)
 
 ---
 
-## ⭐ Support This Project
-
-If this guide saved you money and helped you play Rocksmith:
-- ⭐ **Star this repo**
-- 🔀 **Share on Reddit** (r/rocksmith, r/pcgaming)
-- 📹 **Make a YouTube tutorial** linking back here
-- 💬 **Tell your friends**
-
----
-
 **Questions?** Open an [issue](../../issues) or check [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
