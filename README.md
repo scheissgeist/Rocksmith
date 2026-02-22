@@ -1,231 +1,78 @@
-# Rocksmith 2014 Generic USB Cable Guide
+# 🎸 Rocksmith 2014 - Use ANY Guitar Cable
 
-[![Works on Windows 11](https://img.shields.io/badge/Windows%2011-Working-success)](https://github.com)
-[![Rocksmith 2014](https://img.shields.io/badge/Rocksmith%202014-Remastered-blue)](https://store.steampowered.com/app/221680/Rocksmith_2014_Edition__Remastered/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+## **No Technical Knowledge Needed!**
 
-> **Save $20+** by using generic USB guitar cables instead of the official RealTone cable
+Save $20+ by using **any cheap USB guitar cable** instead of the expensive official RealTone cable.
 
-This guide helps you play **Rocksmith 2014** with **cheap generic USB guitar cables** (the $20-30 ones from Amazon/AliExpress) instead of the expensive official RealTone cable.
+### ⚡ Super Simple Setup (5 Minutes)
 
-**Tested and working with:**
-- ✅ TI PCM2902 USB CODEC cable
-- ✅ C-MEDIA USB Audio Device cable  
-- ✅ Windows 11 (build 26200)
-- ✅ Rocksmith 2014 Remastered (Steam, latest version)
+**Download and run:** [RocksmithCableInstaller.exe](https://github.com/scheissgeist/Rocksmith/releases/latest) *(coming soon!)*
+
+**Or use the script version:** [ultimate-installer.bat](scripts/ultimate-installer.bat) or [ultimate-installer.ps1](scripts/ultimate-installer.ps1)
 
 ---
 
-## 🎸 Quick Start (TL;DR)
+## How Simple Is This?
 
-### Option 1: Ultimate Installer (One-Click Setup) ⚡
+If you can:
+- ✅ Download a file
+- ✅ Click "Next" a few times  
+- ✅ Adjust a volume slider
 
-**Download and run:** [ultimate-installer.bat](scripts/ultimate-installer.bat) or [ultimate-installer.ps1](scripts/ultimate-installer.ps1)
-
-This will:
-- ✅ Download FL Studio ASIO automatically
-- ✅ Download RS_ASIO v0.7.4 automatically
-- ✅ Find your audio devices
-- ✅ Configure everything for you
-
-### Option 2: Manual Setup
-
-1. Install [FL Studio ASIO](https://www.image-line.com/fl-studio-asio/) (free)
-2. Download [RS_ASIO v0.7.4](https://github.com/mdias/rs_asio/releases/tag/v0.7.4)
-3. Follow the [detailed guide](docs/detailed-guide.md)
-
-**Full guide:** See [docs/detailed-guide.md](docs/detailed-guide.md)
+**Then you can do this!** No programming, no tech skills needed.
 
 ---
 
-## 📋 What You Need
+## What Works
 
-### Hardware
-- Generic USB guitar cable (any brand)
-- Electric guitar with 1/4" output
-- Windows PC with audio output (speakers/headphones)
+- ✅ **ANY** generic USB guitar cable ($20-30 on Amazon)
+- ✅ Windows 10 and Windows 11
+- ✅ Rocksmith 2014 Remastered (Steam)
+- ✅ Takes only 5 minutes
 
-### Software
-- **Rocksmith 2014 Remastered** (Steam)
-- **[FL Studio ASIO](https://www.image-line.com/fl-studio-asio/)** - Free ASIO driver
-- **[RS_ASIO v0.7.4](https://github.com/mdias/rs_asio/releases/tag/v0.7.4)** - Cable bypass mod
-
----
-
-## 🚀 Setup Steps
-
-### 1. Install FL Studio ASIO
-
-FL Studio ASIO wraps Windows audio devices into ASIO format.
-
-[Download here](https://www.image-line.com/fl-studio-asio/) → Run installer → Done
+**Tested cables:**
+- TI PCM2902 USB CODEC cable ✅
+- C-MEDIA USB Audio Device cable ✅
+- Your cable probably works too!
 
 ---
 
-### 2. Find Your Audio Device GUIDs
+## 🚀 Quick Start
 
-Run [scripts/find-audio-guids.ps1](scripts/find-audio-guids.ps1) to discover your:
-- **Output device** (speakers/headphones)
-- **Input device** (USB guitar cable)
+### Option 1: One-Click Installer (Easiest) ⚡
 
-Or manually run this PowerShell command:
+**Download and run:** [ultimate-installer.bat](scripts/ultimate-installer.bat)
 
-```powershell
-# Output devices
-Get-ChildItem "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Render" | ForEach-Object {
-    $guid = $_.PSChildName
-    $props = Get-ItemProperty "$($_.PSPath)\Properties" -ErrorAction SilentlyContinue
-    $name = $props."{b3f8fa53-0004-438e-9003-51a46e139bfc},6"
-    if ($name) { Write-Host "$guid : $name" }
-}
+**Download and run:** [ultimate-installer.bat](scripts/ultimate-installer.bat)
 
-# Input devices
-Get-ChildItem "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Capture" | ForEach-Object {
-    $guid = $_.PSChildName
-    $props = Get-ItemProperty "$($_.PSPath)\Properties" -ErrorAction SilentlyContinue
-    $name = $props."{b3f8fa53-0004-438e-9003-51a46e139bfc},6"
-    if ($name) { Write-Host "$guid : $name" }
-}
-```
+**What it does:**
+- Downloads everything you need
+- Finds your devices automatically
+- Sets everything up for you
 
-**Copy the GUIDs** — you'll need them in step 3.
+**Just click "Next" a few times - that's it!**
+
+### Option 2: Step-by-Step Manual Guide
+
+Prefer to do it yourself? Follow the [detailed guide](docs/detailed-guide.md)
 
 ---
 
-### 3. Configure FL Studio ASIO
+## 🐛 Having Trouble?
 
-Replace `{OUTPUT_GUID}` and `{INPUT_GUID}` with your device GUIDs from step 2:
-
-```powershell
-$flAsioReg = "HKCU:\Software\Image-Line\ASIO"
-if (-not (Test-Path $flAsioReg)) {
-    New-Item -Path $flAsioReg -Force | Out-Null
-}
-
-Set-ItemProperty -Path $flAsioReg -Name "outputEndPoint" -Value "{OUTPUT_GUID}" -Type String
-Set-ItemProperty -Path $flAsioReg -Name "inputEndPoint" -Value "{INPUT_GUID}" -Type String
-Set-ItemProperty -Path $flAsioReg -Name "bufferSize" -Value 512 -Type DWord
-```
+- **Check:** [Troubleshooting Guide](TROUBLESHOOTING.md)
+- **Still stuck?** [Open an issue](../../issues) and we'll help!
 
 ---
 
-### 4. Install RS_ASIO
+## 📝 What You Need
 
-1. Download [RS_ASIO v0.7.4](https://github.com/mdias/rs_asio/releases/tag/v0.7.4)
-2. Extract the ZIP
-3. Copy these 3 files to your Rocksmith folder:
-   - `RS_ASIO.dll`
-   - `RS_ASIO.ini`  
-   - `avrt.dll`
+- Any cheap USB guitar cable (works with almost all of them)
+- Electric guitar
+- Windows PC with Rocksmith 2014
+- 5 minutes of your time
 
-**Rocksmith folder:** `C:\Program Files (x86)\Steam\steamapps\common\Rocksmith2014\`
-
----
-
-### 5. Configure RS_ASIO
-
-Edit `RS_ASIO.ini` in the Rocksmith folder:
-
-```ini
-[Config]
-EnableWasapiOutputs=0
-EnableWasapiInputs=0
-EnableAsio=1
-
-[Asio]
-BufferSizeMode=custom
-CustomBufferSize=512
-
-[Asio.Output]
-Driver=FL Studio ASIO
-BaseChannel=0
-EnableSoftwareEndpointVolumeControl=1
-EnableSoftwareMasterVolumeControl=1
-SoftwareMasterVolumePercent=100
-EnableRefCountHack=true
-
-[Asio.Input.0]
-Driver=FL Studio ASIO
-Channel=0
-EnableSoftwareEndpointVolumeControl=1
-EnableSoftwareMasterVolumeControl=1
-SoftwareMasterVolumePercent=100
-EnableRefCountHack=true
-
-[Asio.Input.1]
-Driver=
-Channel=1
-
-[Asio.Input.Mic]
-Driver=
-Channel=
-```
-
-**⚠️ IMPORTANT:** Save without BOM (Byte Order Mark). If using Notepad, save as "UTF-8" (not "UTF-8 with BOM").
-
----
-
-### 6. Configure Rocksmith
-
-Edit `Rocksmith.ini` in the Rocksmith folder:
-
-```ini
-[Audio]
-RealToneCableOnly=0
-ExclusiveMode=1
-LatencyBuffer=4
-Win32UltraLowLatencyMode=1
-```
-
-Keep other settings as-is. The key changes:
-- `RealToneCableOnly=0` — allows generic cables
-- `ExclusiveMode=1` — required for ASIO
-
----
-
-### 7. Windows Audio Settings
-
-#### A. Enable Exclusive Mode (Speakers)
-
-1. Right-click **speaker icon** → **Sound settings**
-2. **More sound settings** → **Playback** tab
-3. Right-click your **speakers** → **Properties** → **Advanced** tab
-4. ✅ Check "Allow applications to take exclusive control"
-5. Click **OK**
-
-#### B. Boost Guitar Input Level
-
-1. **Recording** tab
-2. Right-click your **USB guitar cable** (e.g., "USB Audio Device") → **Properties**
-3. **Levels** tab → Set to **100%**
-4. If available, set **Microphone Boost** to **+20dB**
-5. Click **OK**
-
----
-
-### 8. Launch Rocksmith
-
-1. **Launch through Steam** (not by double-clicking the exe)
-2. If "Ubisoft servers not available" appears, press **ESC** to skip
-3. Go to **Settings → Calibration**
-4. **Strum loudly** when prompted
-
-**🎉 If calibration works, you're done!**
-
----
-
-## 🐛 Troubleshooting
-
-**Problem:** "No audio output device detected"  
-**Fix:** [TROUBLESHOOTING.md#no-audio-output](TROUBLESHOOTING.md#no-audio-output)
-
-**Problem:** Guitar not detected during calibration  
-**Fix:** [TROUBLESHOOTING.md#guitar-not-detected](TROUBLESHOOTING.md#guitar-not-detected)
-
-**Problem:** Game crashes or won't launch  
-**Fix:** [TROUBLESHOOTING.md#game-crashes](TROUBLESHOOTING.md#game-crashes)
-
-**See full troubleshooting guide:** [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+That's it!
 
 ---
 
