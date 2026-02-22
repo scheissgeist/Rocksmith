@@ -1,0 +1,24 @@
+# .gitignore for Rocksmith Generic Cable Guide
+
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# User-specific config (don't commit GUIDs)
+scripts/user-config.txt
+
+# Testing
+test-results/
+*.log
