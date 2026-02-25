@@ -1,194 +1,70 @@
-# Rocksmith 2014 Generic USB Cable - Troubleshooting Summary
+# Troubleshooting
 
-## Problem
-Trying to use generic USB guitar cables (TI PCM2902, C-MEDIA) with Rocksmith 2014 on Windows 11 instead of the official RealTone cable.
+Real problems I ran into and how I fixed them.
 
-## Solution That Worked
+## Game Won't Launch / Crashes Immediately
 
-**Configuration:**
-- **Audio Driver:** FL Studio ASIO (wraps WASAPI to ASIO)
-- **Cable Bypass:** RS_ASIO v0.7.4
-- **OS:** Windows 11 build 26200
-- **Buffer Size:** 512 samples
-- **Input Channel:** 0 (mono)
+**The Ubisoft sync bug:** Rocksmith tries to sync with Ubisoft servers and crashes.
 
-## Key Steps
+Fix:
+1. Go to `C:\Program Files (x86)\Steam\userdata\YOUR_ID\221680\remote\`
+2. Delete any files starting with `crd`
+3. Block Rocksmith in Windows Firewall (outbound rule)
 
-### 1. Install FL Studio ASIO
-Free ASIO driver that wraps Windows audio devices: https://www.image-line.com/fl-studio-asio/
+## Guitar Not Detected During Calibration
 
-### 2. Configure FL Studio ASIO Registry
+**Input volume is too low.** Windows defaults USB mics to like 17%.
+
+Fix:
+1. Right-click speaker icon > Sound Settings > More sound settings
+2. Recording tab > right-click your USB cable > Properties
+3. Levels tab > crank it to 100%
+4. If there's a "Microphone Boost" option, enable it
+
+## "No Audio Output Device Detected"
+
+FL Studio ASIO can't grab your speakers because something else is using them.
+
+Fix:
+1. Close Discord, Spotify, Chrome, anything with audio
+2. Make sure "Exclusive Mode" is enabled for your speakers (Playback > Properties > Advanced)
+
+## RS_ASIO Not Loading (No Log File Created)
+
+The RS_ASIO.ini file has a UTF-8 BOM (invisible bytes at the start) that breaks the parser.
+
+Fix: Re-save the file. In Notepad, Save As > Encoding: UTF-8 (not "UTF-8 with BOM").
+
+Or use PowerShell:
 ```powershell
-$flAsioReg = "HKCU:\Software\Image-Line\ASIO"
-Set-ItemProperty -Path $flAsioReg -Name "outputEndPoint" -Value "{OUTPUT_DEVICE_GUID}" -Type String
-Set-ItemProperty -Path $flAsioReg -Name "inputEndPoint" -Value "{INPUT_DEVICE_GUID}" -Type String
-Set-ItemProperty -Path $flAsioReg -Name "bufferSize" -Value 512 -Type DWord
+$content = Get-Content "RS_ASIO.ini" -Raw
+$utf8 = New-Object System.Text.UTF8Encoding($false)
+[IO.File]::WriteAllText("RS_ASIO.ini", $content, $utf8)
 ```
 
-Device GUIDs found at:
-- Output: `HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Render\`
-- Input: `HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Capture\`
+## Game Hangs at "Connecting to Ubisoft"
 
-### 3. Install RS_ASIO
-Extract RS_ASIO v0.7.4 to Rocksmith folder:
-- `RS_ASIO.dll`
-- `RS_ASIO.ini`
-- `avrt.dll`
+Rocksmith is waiting for a server that will never respond.
 
-### 4. Configure RS_ASIO.ini
-```ini
-[Config]
-EnableWasapiOutputs=0
-EnableWasapiInputs=0
-EnableAsio=1
+Fix: Spam ESC repeatedly. Or block the game in Windows Firewall before launching.
 
-[Asio]
-BufferSizeMode=custom
-CustomBufferSize=512
+## Audio is Choppy / Stuttering
 
-[Asio.Output]
-Driver=FL Studio ASIO
-BaseChannel=0
-EnableSoftwareEndpointVolumeControl=1
-EnableSoftwareMasterVolumeControl=1
-SoftwareMasterVolumePercent=100
-EnableRefCountHack=true
+Buffer size is too small for your system.
 
-[Asio.Input.0]
-Driver=FL Studio ASIO
-Channel=0
-EnableSoftwareEndpointVolumeControl=1
-EnableSoftwareMasterVolumeControl=1
-SoftwareMasterVolumePercent=100
-EnableRefCountHack=true
-```
+Fix: In RS_ASIO.ini, change `CustomBufferSize=512` to `CustomBufferSize=1024` or `2048`.
 
-**CRITICAL:** Save without BOM (Byte Order Mark) or RS_ASIO won't read it properly.
+## "Channel 3 is beyond max ASIO channels"
 
-### 5. Configure Rocksmith.ini
-```ini
-RealToneCableOnly=0
-ExclusiveMode=1
-Win32UltraLowLatencyMode=1
-```
+You're trying to use a channel that doesn't exist on your device.
 
-### 6. Windows Audio Settings
-- **Playback Device:** Enable "Allow applications to take exclusive control"
-- **Recording Device (USB cable):** Set level to 100%, enable Microphone Boost if available
+Fix: In RS_ASIO.ini under `[Asio.Input.0]`, make sure `Channel=0` (not 2 or 3).
 
-### 7. Fix Ubisoft Connection Hangs
-Block Rocksmith internet access via Windows Firewall:
-- Outbound rule blocking `Rocksmith2014.exe`
-- Or spam ESC/Enter when "Ubisoft servers not available" appears
+## Still Not Working?
 
-## Why It Works
+Try the simpler approach first:
+1. Install [RSMods](https://github.com/Lovrom8/RSMods)
+2. Enable "Direct Connect" mode
+3. Select your USB cable as input in Rocksmith settings
 
-1. **RS_ASIO** intercepts Rocksmith's audio initialization and redirects to ASIO drivers instead of looking for RealTone cable
-2. **FL Studio ASIO** provides ASIO interface to any Windows audio device (WASAPI wrapper)
-3. **Registry configuration** tells FL Studio ASIO exactly which devices to use
-4. **Exclusive mode** allows ASIO to take full control for low latency
-5. **Channel 0** maps to the mono guitar input (left channel)
-
-## What Didn't Work
-
-### ❌ ASIO4ALL
-- Control panel was confusing ("Not Connected" states)
-- Required manual device enabling during Rocksmith runtime
-- FL Studio ASIO is more reliable and configurable via registry
-
-### ❌ NoCableLauncher
-- "Offsets not found" error on current Rocksmith version
-- Outdated patcher incompatible with latest game build
-
-### ❌ Direct WASAPI in RS_ASIO
-- `EnableWasapiOutputs=1` and `EnableWasapiInputs=1` failed
-- FL Studio ASIO wrapper was necessary
-
-## Errors Encountered & Fixed
-
-### Error: "No audio output device detected"
-**Cause:** FL Studio ASIO couldn't access output device  
-**Fix:** Enable exclusive mode for speakers in Windows Sound settings
-
-### Error: "Your audio output device is not configured for Audio Exclusivity"
-**Cause:** Exclusive mode disabled in Windows  
-**Fix:** Sound settings → Playback → Speakers → Properties → Advanced → Check "Allow applications to take exclusive control"
-
-### Error: Guitar not detected during calibration
-**Cause:** Input volume too low (17%)  
-**Fix:** Sound settings → Recording → USB Audio Device → Properties → Levels → Set to 100%
-
-### Error: RS_ASIO not loading (no log file)
-**Cause:** Launch method or file permissions  
-**Fix:** Launch Rocksmith through Steam (not by double-clicking exe)
-
-### Error: "0 render devices, 0 capture devices" in RS_ASIO log
-**Cause:** UTF-8 BOM in RS_ASIO.ini confusing the parser  
-**Fix:** Re-save RS_ASIO.ini without BOM:
-```powershell
-$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-[System.IO.File]::WriteAllText($iniPath, $config, $utf8NoBom)
-```
-
-### Error: Game crashes at "Loading Profile"
-**Cause:** Ubisoft account sync conflict with Steam Cloud  
-**Fix:** Delete `crd*` files in Steam userdata folder, disable Steam Cloud Sync
-
-### Error: Game hangs at "Connecting to Ubisoft servers"
-**Cause:** Timeout waiting for Ubisoft connection  
-**Fix:** Block Rocksmith internet access via Windows Firewall or spam ESC to skip
-
-## Final Working Configuration
-
-**Hardware:**
-- Generic USB guitar cable (C-MEDIA USB Audio Device)
-- Realtek onboard audio for output
-- Any electric guitar with 1/4" cable
-
-**Software Stack:**
-- Rocksmith 2014 Remastered (Steam, latest version)
-- RS_ASIO v0.7.4
-- FL Studio ASIO (latest)
-- Windows 11 build 26200
-
-**Audio Chain:**
-```
-Guitar → USB Cable → FL Studio ASIO (WASAPI wrapper) → RS_ASIO → Rocksmith → FL Studio ASIO → Realtek Audio → Speakers
-```
-
-**Latency:**
-- Buffer: 512 samples @ 48kHz = ~10.67ms
-- Acceptable for rhythm guitar
-- Can reduce to 256 samples if system handles it
-
-## Files Created
-
-1. **ROCKSMITH_GENERIC_CABLE_GUIDE.md** - Complete setup guide for users
-2. **ROCKSMITH_QUICK_SETUP.bat** - Automated setup script (requires manual FL Studio ASIO + RS_ASIO installation first)
-3. **rocksmith_troubleshooting_summary.md** - This file (developer notes)
-
-## Share Links
-
-**Reddit:**
-- r/rocksmith: "Generic USB Guitar Cable Setup Guide (FL Studio ASIO + RS_ASIO)"
-- r/pcgaming: "How to use cheap $20 USB guitar cables with Rocksmith 2014"
-
-**Steam Community:**
-- Upload as Steam Guide for Rocksmith 2014
-
-**YouTube Tutorial:**
-- Screen record the setup process
-- Show Windows Sound settings configuration
-- Show device GUID discovery
-- Show RS_ASIO.ini editing
-- Show in-game calibration working
-
-## Credits
-
-- **RS_ASIO** by mdias: https://github.com/mdias/rs_asio
-- **FL Studio ASIO** by Image-Line: https://www.image-line.com/fl-studio-asio/
-- Community troubleshooting and testing (Feb 2026)
-
----
-
-**Result:** ✅ Working perfectly with generic USB cable!
+Direct Connect works for most generic cables without needing RS_ASIO.
