@@ -187,7 +187,7 @@ Guitar → USB Cable → FL Studio ASIO (WASAPI wrapper) → RS_ASIO → Rocksmi
 
 - **RS_ASIO** by mdias: https://github.com/mdias/rs_asio
 - **FL Studio ASIO** by Image-Line: https://www.image-line.com/fl-studio-asio/
-- Troubleshooting session: Sean Wever + Claude Sonnet (Feb 21-22, 2026)
+- Community troubleshooting and testing (Feb 2026)
 
 ---
 

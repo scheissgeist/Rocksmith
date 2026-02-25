@@ -341,7 +341,7 @@ If FL Studio ASIO doesn't work, you can try **ASIO4ALL** instead:
 
 - **RS_ASIO** by mdias: https://github.com/mdias/rs_asio
 - **FL Studio ASIO** by Image-Line: https://www.image-line.com/fl-studio-asio/
-- Original troubleshooting by Sean Wever and Claude Sonnet (Feb 2026)
+- Community troubleshooting and guide compilation (Feb 2026)
 
 ---
 
