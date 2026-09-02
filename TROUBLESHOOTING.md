@@ -176,3 +176,75 @@ produces:
 
 Exclusive mode is how RS_ASIO takes over the stream and hands it to the ASIO
 driver. Leave it at 1.
+
+## Screeching / "Ground Noise" With the Guitar Untouched
+
+Symptom: a constant screech, rumble or hiss whenever Rocksmith has focus,
+present even when you are not touching the guitar. Stops the moment the game
+loses focus (Rocksmith releases its audio stream when unfocused, so this is
+easy to mistake for "it stopped" while you are testing).
+
+Cause: **Rocksmith's own internal input gain stacks on top of RS_ASIO's
+software gain.** At `SoftwareMasterVolumePercent=100` the combined gain
+amplifies the cable's noise floor into an audible screech. Cheap generic
+cables (CM108, PCM2902, Behringer Guitar 2 USB) have a high enough noise
+floor for this to be very audible.
+
+This is a known upstream issue, not specific to this guide:
+<https://github.com/mdias/rs_asio/issues/246> — same symptom, same cause,
+described there as "ground noise ... like a microphone with the gain maxed."
+
+Fix — lower the **input** gain only, in `RS_ASIO.ini`:
+
+```
+[Asio.Input.0]
+SoftwareMasterVolumePercent=60
+```
+
+Leave `[Asio.Output]` at 100 — that is the game's own audio and lowering it
+just makes the game quiet.
+
+**Known trade-off:** at 60 the signal may be too weak for in-game
+calibration. If calibration fails, step up (70, then 80) until it calibrates
+but before the noise comes back.
+
+### What this is NOT (so you don't waste time like we did)
+
+Each of these was measured and ruled out before the real cause was found:
+
+- **Not the cable or a bad guitar signal.** Recording direct from the cable
+  while idle measured **-88.8 dB** — silent, no hum series, no peaks. The
+  cable is fine; the noise is created downstream.
+- **Not AC hum / a ground loop**, despite the output spectrum peaking at
+  119.8 Hz and 240 Hz (2x and 4x 60 Hz mains). Real hum is steady; this
+  varied wildly over 14 s (coefficient of variation 0.83), which means
+  content, not interference. **Frequency alone does not identify a source —
+  check whether the level is steady.**
+- **Not a sample-rate mismatch.** Both endpoints accepted 48000 only and
+  rejected 44100 (`PaErrorCode -9997`); they matched.
+- **Not mono/stereo handling.** WASAPI capture showed L and R bit-identical
+  (`corr = 1.0`) — Windows duplicating a mono source correctly.
+- **Not buffer size.** Level was constant with no dropouts. Issue #246
+  reports the same: `CustomBufferSize` changes had no effect on this noise.
+  (Buffer size is the fix for *crackling/stuttering*, a different symptom.)
+- **Not Windows "Listen to this device" loopback**, and not guitar pickups —
+  the noise is identical with the guitar volume at zero.
+
+### How to measure it yourself
+
+Capture the cable directly rather than using Stereo Mix. Stereo Mix is a
+loopback of *everything the OS plays*, so it records the game's own audio and
+tells you nothing about cable noise:
+
+```
+ffmpeg -f dshow -i audio="Microphone (4- USB Audio Device)" -t 6 -y idle.wav
+ffmpeg -i idle.wav -af volumedetect -f null -
+```
+
+Run it with the guitar untouched. A quiet cable reads about -85 dB or lower.
+If the cable is quiet but you still hear the screech, the noise is being
+generated downstream — that is this bug.
+
+One trap: **run the capture in the background**, because a foreground tool
+steals focus and Rocksmith silences its audio when unfocused. You will record
+silence and conclude the problem vanished.

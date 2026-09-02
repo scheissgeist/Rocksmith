@@ -15,7 +15,7 @@ ended with the crash fixed and the screech characterized but NOT fixed.
 |---|---|
 | Game crashed on startup / after login | **FIXED** — `systemdetection.dll` disabled |
 | FL Studio ASIO pointed at a nonexistent input device | **FIXED** — repointed to the real cable |
-| Screeching / rumble audio | **NOT FIXED** — characterized, cause not isolated |
+| Screeching / rumble audio | **CAUSE FOUND** (upstream issue #246) — fix applied, awaiting Sean's test |
 | Hang on "Connecting to Ubisoft" (white screen) | **NOT DIAGNOSED** — appeared at end of session |
 
 ---
@@ -180,7 +180,45 @@ the temporal behavior has to match too.
 3. **Generated inside the game's audio chain**, since the cable is silent and
    the sound follows the game's audio stream lifecycle.
 
-### The untested hypothesis (next thing to try)
+### RESOLVED BY A WEB SEARCH — upstream issue #246
+
+**A search at the end of the session found this exact problem already
+reported and solved:** <https://github.com/mdias/rs_asio/issues/246>
+
+That reporter's description: "ground noise" after playing strings at
+`SoftwareMasterVolumePercent=100`, sounding "like a microphone with the gain
+maxed out", on a Behringer Guitar 2 USB — the same class of cheap USB cable
+as the CM108 here. They also confirmed `CustomBufferSize` changes had no
+effect, matching what was measured locally (constant level, no dropouts).
+
+Cause, per the issue and consistent with every measurement taken here:
+**Rocksmith's internal input gain stacks on top of RS_ASIO's software gain**,
+amplifying the cable's noise floor. This is exactly why the cable measured
+-88.8 dB (silent) while the output screeched.
+
+Fix applied (input section only; output stays at 100):
+
+```
+[Asio.Input.0]
+SoftwareMasterVolumePercent=60
+```
+
+Known trade-off from the issue: at 60 the signal may be too weak for in-game
+calibration. Step up to 70 or 80 if calibration fails, staying below the
+level where noise returns.
+
+**Not yet confirmed working on this machine** — applied after Sean stopped
+for the session.
+
+Related but different: <https://github.com/mdias/rs_asio/issues/569> was
+closed as "Not RS ASIO" and attributed to cable quality, but that reporter's
+crackling was tied to specific strings, unlike this constant idle noise.
+
+**Method note: this search should have happened in the first ten minutes.**
+The local measurements were correct and led to the right hypothesis, but the
+answer was a public, closed GitHub issue the whole time.
+
+### The hypothesis this replaced (kept for the record)
 
 `RS_ASIO.ini` `[Asio.Input.0]` has:
 
@@ -285,12 +323,12 @@ Crash dumps are written by the game into its own install folder as
 
 ## Open threads
 
-1. **The screech.** Next concrete action: set
-   `EnableSoftwareEndpointVolumeControl=0` and
-   `EnableSoftwareMasterVolumeControl=0` in `[Asio.Input.0]` **only**, launch,
-   and capture with ffmpeg **in the background** while the game holds focus.
-   If unchanged, try Rocksmith's own in-game input volume slider, which is a
-   separate control from both of these.
+1. **The screech — fix applied, needs testing.** `[Asio.Input.0]
+   SoftwareMasterVolumePercent=60` is set (per upstream issue #246). Launch
+   and listen. If the noise is gone but in-game calibration fails because the
+   signal is too weak, raise to 70 then 80. If the noise persists at 60, drop
+   to 50 before looking elsewhere. Capture with ffmpeg **in the background**
+   if measuring, so focus stays on the game.
 
 2. **The Ubisoft hang.** Test `UseProxy=0` in `Rocksmith.ini` `[Net]`.
 
@@ -326,3 +364,9 @@ Crash dumps are written by the game into its own install folder as
 - **Frequency alone does not identify a source.** Something can sit exactly on
   the 60 Hz harmonic series and still not be hum. Check whether the level is
   steady over time.
+- **Search for the symptom before instrumenting it.** The screech was a known,
+  closed upstream issue (rs_asio #246) with a one-line fix. Roughly an hour of
+  local measurement reached the same conclusion the issue states outright. The
+  measurements were not wasted — they are what makes the fix verifiable, and
+  they ruled out six other causes — but a two-minute search should have come
+  first. Same lesson as looking for an existing source before deriving one.
