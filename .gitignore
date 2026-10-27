@@ -22,3 +22,21 @@ scripts/user-config.txt
 # Testing
 test-results/
 *.log
+
+# Secrets and credentials (never commit)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*
+secrets*
+
+# Machine-specific debug output (can contain usernames, device IDs, paths)
+*.mdmp
+*.dmp
+*.reg
+audiodump.txt
+RS_ASIO-log.txt
