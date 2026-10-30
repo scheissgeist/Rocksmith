@@ -261,7 +261,7 @@ Both documented fixes from TROUBLESHOOTING.md were already in place:
   protocols/addresses/profiles** (verified via `Get-NetFirewallRule`, which
   returned three Rocksmith rules — a non-empty result, so the query works)
 - No `crd*` files in
-  `C:\Program Files (x86)\Steam\userdata\19209262\221680\remote\` to delete.
+  `C:\Program Files (x86)\Steam\userdata\<steam-account-id>\221680\remote\` to delete.
   Control: that same directory listing **did** return three other files
   (two `_PRFLDB` profiles and `LocalProfiles.json`), so the directory was
   read successfully and the absence of `crd*` is real.
@@ -312,7 +312,7 @@ Crash dumps are written by the game into its own install folder as
 - `RS_ASIO.ini` — byte-identical to backup (verified by `diff`)
 
 **Backups** (session scratchpad,
-`C:\Users\seanw\AppData\Local\Temp\claude\e--ZELDAFPS\b0f939d6-c793-4f0d-8253-4d5f3d6e3552\scratchpad\`):
+`%LOCALAPPDATA%\Temp\claude\<project>\<session-id>\scratchpad\`):
 - `Rocksmith.ini.bak_before_exclusive`
 - `RS_ASIO.ini.bak_before_buffer`
 - `systemdetection.dll.backup`
